@@ -46,12 +46,7 @@ public class MailkitSender : ISender
         {
             foreach ( var ea in message.Attachments )
             {
-                byte[] bytes;
-
-                if ( ea.TextContent != null )
-                    bytes = Encoding.UTF8.GetBytes( ea.TextContent );
-                else
-                    bytes = ea.BinaryContent ?? [];
+                byte[] bytes = ea.BinaryContent ?? [];
 
                 if ( ea.ContentId != null )
                 {

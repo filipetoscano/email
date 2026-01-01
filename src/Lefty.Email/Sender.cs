@@ -3,9 +3,13 @@
 /// <summary />
 public enum Sender
 {
-    /// <summary />
+    /// <summary>
+    /// SMTP, using Mailkit library.
+    /// </summary>
     Smtp,
 
-    /// <summary />
+    /// <summary>
+    /// Resend API.
+    /// </summary>
     Resend,
 }

@@ -3,34 +3,52 @@ using System.Text.Json.Serialization;
 
 namespace Lefty.Email;
 
-/// <summary />
+/// <summary>
+/// Email message.
+/// </summary>
 public class Email
 {
-    /// <summary />
+    /// <summary>
+    /// Sender.
+    /// </summary>
     public EmailAddress? From { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// Recipient.
+    /// </summary>
     public EmailAddressList? To { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// Carbon copy.
+    /// </summary>
     [JsonIgnore( Condition = JsonIgnoreCondition.WhenWritingNull )]
     public EmailAddressList? Cc { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// Blind carbon copy.
+    /// </summary>
     [JsonIgnore( Condition = JsonIgnoreCondition.WhenWritingNull )]
     public EmailAddressList? Bcc { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// Subject.
+    /// </summary>
     public string? Subject { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// Plain text body.
+    /// </summary>
     public string? TextBody { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// HTML body.
+    /// </summary>
     public string? HtmlBody { get; set; }
 
 
-    /// <summary />
+    /// <summary>
+    /// List of attachments.
+    /// </summary>
     public List<EmailAttachment>? Attachments { get; set; }
 }
 
@@ -38,25 +56,33 @@ public class Email
 /// <summary />
 public class EmailAttachment
 {
-    /// <summary />
+    /// <summary>
+    /// File path, relative to directory of JSON file or current
+    /// directory if JSON is piped into tool.
+    /// </summary>
     public required string Filename { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// Content identifier, when referring to attachments from
+    /// the HTML body.
+    /// </summary>
     public string? ContentId { get; set; }
 
-    /// <summary />
+    /// <summary>
+    /// MIME type of the attachment.
+    /// </summary>
     public string? ContentType { get; set; }
 
 
-    /// <summary />
+    /// <summary>
+    /// Name only of the file attachment.
+    /// </summary>
     [JsonIgnore]
     public string? Name { get; set; }
 
-    /// <summary />
-    [JsonIgnore]
-    public string? TextContent { get; set; }
-
-    /// <summary />
+    /// <summary>
+    /// Binary content.
+    /// </summary>
     [JsonIgnore]
     public byte[]? BinaryContent { get; set; }
 }

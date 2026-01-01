@@ -264,15 +264,7 @@ public class Program
                     return 1;
                 }
 
-                if ( att.ContentType?.StartsWith( "text/" ) == true
-                    || att.ContentType?.StartsWith( "application/json" ) == true )
-                {
-                    att.TextContent = await File.ReadAllTextAsync( att.Filename );
-                }
-                else
-                {
-                    att.BinaryContent = await File.ReadAllBytesAsync( att.Filename );
-                }
+                att.BinaryContent = await File.ReadAllBytesAsync( att.Filename );
             }
         }
 
