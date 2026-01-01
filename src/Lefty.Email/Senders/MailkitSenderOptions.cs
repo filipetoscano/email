@@ -18,4 +18,7 @@ public class MailkitSenderOptions
 
     /// <summary />
     public string? Password { get; set; }
+
+    /// <summary />
+    public bool CheckCertificateRevocation { get; set; } = true;
 }

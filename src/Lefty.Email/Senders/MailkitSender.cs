@@ -22,7 +22,7 @@ public class MailkitSender : ISender
     public async Task Send( Email message )
     {
         /*
-         * 
+         * Map
          */
         var m = new MimeMessage();
 
@@ -69,17 +69,28 @@ public class MailkitSender : ISender
 
 
         /*
-         * 
+         * Send
          */
+        string resp;
+
         using ( var client = new SmtpClient() )
         {
+            client.CheckCertificateRevocation = _options.CheckCertificateRevocation;
+
+            client.MessageSent += ( _, ea ) =>
+            {
+                Console.WriteLine( ea.Response );
+            };
+
             await client.ConnectAsync( _options.Host, _options.Port, _options.UseSsl );
 
             if ( _options.Username != null )
                 await client.AuthenticateAsync( _options.Username, _options.Password );
 
-            await client.SendAsync( m );
+            resp = await client.SendAsync( m );
             await client.DisconnectAsync( true );
         }
+
+        Console.WriteLine( "{0}", resp );
     }
 }
