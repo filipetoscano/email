@@ -280,7 +280,7 @@ public class Program
         /*
          * 
          */
-        await _sender.Send( message );
+        await _sender.SendAsync( message );
 
         return 0;
     }

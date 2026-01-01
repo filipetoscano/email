@@ -15,7 +15,7 @@ public class ResendSender : ISender
 
 
     /// <inheritdoc />
-    public async Task Send( Email message )
+    public async Task SendAsync( Email message )
     {
         /*
          * Map

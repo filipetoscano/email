@@ -1,8 +1,12 @@
 ﻿namespace Lefty.Email;
 
-/// <summary />
+/// <summary>
+/// Email sender.
+/// </summary>
 public interface ISender
 {
-    /// <summary />
-    Task Send( Email message );
+    /// <summary>
+    /// Sends an email message.
+    /// </summary>
+    Task SendAsync( Email message );
 }
