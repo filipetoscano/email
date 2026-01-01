@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/cicd/">
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path="cicd/ci.sh" />
+    <File Path="cicd/release.sh" />
+  </Folder>
+  <Folder Name="/sln/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Lefty.Email/Lefty.Email.csproj" Id="bf232c1e-d4be-47c8-afa5-38802680e2a7" />
+  </Folder>
+</Solution>

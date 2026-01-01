@@ -1,0 +1,18 @@
+# Root ignores
+/.nuget/
+/data/
+/nupkg/
+
+# Specific
+/src/Lefty.Email/*.html
+/src/Lefty.Email/*.json
+
+# Global ignores
+bin/
+obj/
+.vs/
+*.csproj.user
+*.pubxml.user
+*.sqlproj.user
+
+# eof
