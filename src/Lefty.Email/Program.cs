@@ -178,14 +178,17 @@ public class Program
          * 
          */
         string json;
+        string cwd;
 
-        if ( Console.IsInputRedirected == true && this.InputFile == null )
+        if ( Console.IsInputRedirected == true )
         {
             json = await Console.In.ReadToEndAsync();
+            cwd = Environment.CurrentDirectory;
         }
         else if ( this.InputFile != null )
         {
             json = File.ReadAllText( this.InputFile );
+            cwd = Path.GetDirectoryName( this.InputFile )!;
         }
         else
         {
@@ -224,7 +227,7 @@ public class Program
          */
         if ( message.HtmlBody?.StartsWith( "@" ) == true )
         {
-            var fname = message.HtmlBody[ 1.. ];
+            var fname = Path.Combine( cwd, message.HtmlBody[ 1.. ] );
 
             if ( File.Exists( fname ) == false )
             {
@@ -237,7 +240,7 @@ public class Program
 
         if ( message.TextBody?.StartsWith( "@" ) == true )
         {
-            var fname = message.TextBody[ 1.. ];
+            var fname = Path.Combine( cwd, message.TextBody[ 1.. ] );
 
             if ( File.Exists( fname ) == false )
             {
@@ -256,15 +259,16 @@ public class Program
         {
             foreach ( var att in message.Attachments )
             {
-                att.Name = Path.GetFileName( att.Filename );
+                var fname = Path.Combine( cwd, att.Filename );
 
-                if ( File.Exists( att.Filename ) == false )
+                if ( File.Exists( fname ) == false )
                 {
-                    Console.Error.WriteLine( "err: SE004: unable to load attachment from file {0}", att.Filename );
+                    Console.Error.WriteLine( "err: SE004: unable to load attachment from file {0}", fname );
                     return 1;
                 }
 
-                att.BinaryContent = await File.ReadAllBytesAsync( att.Filename );
+                att.Name = Path.GetFileName( att.Filename );
+                att.BinaryContent = await File.ReadAllBytesAsync( fname );
             }
         }
 
