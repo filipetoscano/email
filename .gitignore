@@ -4,6 +4,7 @@
 /nupkg/
 
 # Specific
+/src/Lefty.Email/*.cmd
 /src/Lefty.Email/*.html
 /src/Lefty.Email/*.json
 
