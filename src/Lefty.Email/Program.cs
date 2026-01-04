@@ -48,6 +48,12 @@ public class Program
 
         svc.AddOptions();
 
+        // Null
+        if ( sender == Sender.Null )
+        {
+            svc.AddTransient<ISender, NullSender>();
+        }
+
         // Smtp
         if ( sender == Sender.Smtp )
         {

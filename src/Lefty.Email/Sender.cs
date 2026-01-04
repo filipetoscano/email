@@ -12,4 +12,9 @@ public enum Sender
     /// Resend API.
     /// </summary>
     Resend,
+
+    /// <summary>
+    /// Null/always ok.
+    /// </summary>
+    Null,
 }
