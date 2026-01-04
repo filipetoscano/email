@@ -8,5 +8,5 @@ public interface ISender
     /// <summary>
     /// Sends an email message.
     /// </summary>
-    Task SendAsync( Email message );
+    Task<string> SendAsync( Email message );
 }

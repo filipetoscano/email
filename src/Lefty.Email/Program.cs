@@ -3,6 +3,7 @@ using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Resend;
+using Spectre.Console;
 using System.Reflection;
 using System.Text.Json;
 
@@ -34,7 +35,7 @@ public class Program
             }
             catch
             {
-                Console.WriteLine( "err: sender '{0}' is unsupported", econfig );
+                AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: $env:EMAIL_SENDER value '{econfig}' is unsupported" );
                 return 2;
             }
         }
@@ -63,14 +64,31 @@ public class Program
                 var port = Environment.GetEnvironmentVariable( "SMTP_PORT" );
 
                 if ( port != null )
-                    o.Port = int.Parse( port );
+                {
+                    try
+                    {
+                        o.Port = int.Parse( port );
+                    }
+                    catch
+                    {
+                        o.Port = -1;
+                    }
+                }
 
                 // SSL
                 o.UseSsl = true;
                 var ssl = Environment.GetEnvironmentVariable( "SMTP_SSL" );
 
                 if ( ssl != null )
-                    o.UseSsl = bool.Parse( ssl );
+                {
+                    try
+                    {
+                        o.UseSsl = bool.Parse( ssl );
+                    }
+                    catch
+                    {
+                    }
+                }
 
                 // Auth
                 o.Username = Environment.GetEnvironmentVariable( "SMTP_USERNAME" );
@@ -112,13 +130,12 @@ public class Program
         catch ( TargetInvocationException ex )
             when ( ex.InnerException?.GetType() == typeof( OptionsValidationException ) )
         {
-            Console.WriteLine( "err: {0}", ex.InnerException.Message );
-
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.InnerException.Message}" );
             return 2;
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( "ftl: unhandled exception during setup" );
+            AnsiConsole.MarkupLineInterpolated( $"[red]ftl[/]: unhandled exception during setup" );
             Console.WriteLine( ex.ToString() );
 
             return 2;
@@ -134,13 +151,13 @@ public class Program
         }
         catch ( UnrecognizedCommandParsingException ex )
         {
-            Console.WriteLine( "err: " + ex.Message );
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.Message}" );
 
             return 2;
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( "ftl: unhandled exception during execution" );
+            AnsiConsole.MarkupLineInterpolated( $"[red]ftl[/]: unhandled exception during execution" );
             Console.WriteLine( ex.ToString() );
 
             return 2;
@@ -172,28 +189,54 @@ public class Program
 
 
     /// <summary />
+    [Option( "-f|--from", CommandOptionType.SingleValue, Description = "Sender email address" )]
+    public string? FromAddress { get; set; }
+
+    /// <summary />
+    [Option( "-t|--to", CommandOptionType.MultipleValue, Description = "Recipient email address" )]
+    public List<string>? ToAddress { get; set; }
+
+    /// <summary />
+    [Option( "-s|--subject", CommandOptionType.SingleValue, Description = "Subject" )]
+    public string? Subject { get; set; }
+
+    /// <summary />
+    [Option( "-h|--html-file", CommandOptionType.SingleValue, Description = "HTML file" )]
+    [FileExists]
+    public string? HtmlFile { get; set; }
+
+    /// <summary />
+    [Option( "-x|--text-file", CommandOptionType.SingleValue, Description = "Text file" )]
+    [FileExists]
+    public string? TextFile { get; set; }
+
+    /// <summary />
+    [Option( "-X|--text", CommandOptionType.SingleValue, Description = "Text content" )]
+    public string? Text { get; set; }
+
+
+    /// <summary />
+    [Option( "-e|--env", CommandOptionType.NoValue, Description = "Load sender/recipient from environment variables" )]
+    public bool FromEnvironment { get; set; }
+
+
+    /// <summary />
     public async Task<int> OnExecuteAsync( CommandLineApplication app )
     {
         /*
          * 
          */
-        string json;
-        string cwd;
+        string cwd = Environment.CurrentDirectory;
+        string? json = null;
 
         if ( Console.IsInputRedirected == true )
         {
             json = await Console.In.ReadToEndAsync();
-            cwd = Environment.CurrentDirectory;
         }
         else if ( this.InputFile != null )
         {
             json = File.ReadAllText( this.InputFile );
             cwd = Path.GetDirectoryName( this.InputFile )!;
-        }
-        else
-        {
-            app.ShowHelp();
-            return 1;
         }
 
 
@@ -202,24 +245,97 @@ public class Program
          */
         Email message;
 
-        var jso = new JsonSerializerOptions()
+        if ( json != null )
         {
-            AllowTrailingCommas = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            PropertyNameCaseInsensitive = true,
-        };
+            var jso = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                PropertyNameCaseInsensitive = true,
+            };
 
-        try
-        {
-            message = JsonSerializer.Deserialize<Email>( json, jso )!;
-        }
-        catch ( Exception ex )
-        {
-            Console.Error.WriteLine( "err: SE001: invalid JSON" );
-            Console.Error.WriteLine( ex.ToString() );
+            try
+            {
+                message = JsonSerializer.Deserialize<Email>( json, jso )!;
+            }
+            catch ( Exception ex )
+            {
+                AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is not valid JSON" );
+                Console.Error.WriteLine( ex.ToString() );
 
-            return 1;
+                return 1;
+            }
         }
+        else
+        {
+            message = new Email();
+        }
+
+
+        /*
+         * From environment
+         */
+        if ( this.FromEnvironment == true )
+        {
+            // Sender
+            var from = Environment.GetEnvironmentVariable( "EMAIL_FROM" );
+
+            if ( string.IsNullOrEmpty( from ) == false )
+                message.From = from;
+
+
+            // Recipient
+            var to = Environment.GetEnvironmentVariable( "EMAIL_TO" );
+
+            if ( string.IsNullOrEmpty( to ) == false )
+            {
+                var parts = to.Split( ';' );
+                message.To = EmailAddressList.From( parts );
+            }
+
+
+            // Subject
+            var subject = Environment.GetEnvironmentVariable( "EMAIL_SUBJECT" );
+
+            if ( string.IsNullOrEmpty( subject ) == false )
+                message.Subject = subject;
+
+
+            // HTML body
+            var html = Environment.GetEnvironmentVariable( "EMAIL_HTML" );
+
+            if ( string.IsNullOrEmpty( html ) == false )
+                message.HtmlBody = "@" + html;
+
+
+            // Text body
+            var text = Environment.GetEnvironmentVariable( "EMAIL_TEXT" );
+
+            if ( string.IsNullOrEmpty( text ) == false )
+                message.TextBody = "@" + text;
+        }
+
+
+        /*
+         * From command-line
+         */
+        if ( string.IsNullOrEmpty( this.FromAddress ) == false )
+            message.From = this.FromAddress;
+
+        if ( this.ToAddress != null )
+            message.To = EmailAddressList.From( this.ToAddress );
+
+        if ( string.IsNullOrEmpty( this.Subject ) == false )
+            message.Subject = this.Subject;
+
+        if ( this.HtmlFile != null )
+            message.HtmlBody = await File.ReadAllTextAsync( this.HtmlFile );
+
+        if ( this.TextFile != null )
+            message.TextBody = await File.ReadAllTextAsync( this.TextFile );
+
+        if ( string.IsNullOrEmpty( this.Text ) == false )
+            message.TextBody = this.Text;
 
 
         /*
@@ -231,7 +347,7 @@ public class Program
 
             if ( File.Exists( fname ) == false )
             {
-                Console.Error.WriteLine( "err: SE002: unable to load HTML body from file {0}", fname );
+                AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: unable to load HTML body from file '{fname}'" );
                 return 1;
             }
 
@@ -244,7 +360,7 @@ public class Program
 
             if ( File.Exists( fname ) == false )
             {
-                Console.Error.WriteLine( "err: SE003: unable to load text body from file {0}", fname );
+                AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: unable to load text body from file '{fname}'" );
                 return 1;
             }
 
@@ -263,7 +379,7 @@ public class Program
 
                 if ( File.Exists( fname ) == false )
                 {
-                    Console.Error.WriteLine( "err: SE004: unable to load attachment from file {0}", fname );
+                    AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: unable to load attachment from file '{fname}'" );
                     return 1;
                 }
 
@@ -274,9 +390,45 @@ public class Program
 
 
         /*
+         * Validations
+         */
+        if ( message.From == null )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: message has no sender/from" );
+            return 1;
+        }
+
+        if ( message.To == null )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: message has no recipient/to" );
+            return 1;
+        }
+
+        if ( message.To.Count() == 0 )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: message has no recipient/to" );
+            return 1;
+        }
+
+        if ( message.Subject == null )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: message has no subject" );
+            return 1;
+        }
+
+        if ( message.HtmlBody == null && message.TextBody == null )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: message has neither html/text body" );
+            return 1;
+        }
+
+
+        /*
          * 
          */
-        await _sender.SendAsync( message );
+        var output = await _sender.SendAsync( message );
+
+        AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: {output}" );
 
         return 0;
     }

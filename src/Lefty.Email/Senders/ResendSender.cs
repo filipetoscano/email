@@ -16,7 +16,7 @@ public class ResendSender : ISender
 
 
     /// <inheritdoc />
-    public async Task SendAsync( Email message )
+    public async Task<string> SendAsync( Email message )
     {
         /*
          * Map
@@ -68,7 +68,7 @@ public class ResendSender : ISender
          */
         var resp = await _resend.EmailSendAsync( m );
 
-        Console.WriteLine( "{0}", resp.Content );
+        return resp.Content.ToString();
     }
 
 

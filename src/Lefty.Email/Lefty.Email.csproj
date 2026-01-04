@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.11" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.11" />
     <PackageReference Include="Resend" Version="0.2.1" />
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
   </ItemGroup>
 
 </Project>

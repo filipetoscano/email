@@ -19,7 +19,7 @@ public class MailkitSender : ISender
 
 
     /// <inheritdoc />
-    public async Task SendAsync( Email message )
+    public async Task<string> SendAsync( Email message )
     {
         /*
          * Map
@@ -66,7 +66,7 @@ public class MailkitSender : ISender
         /*
          * Send
          */
-        string resp;
+        string resp = "";
 
         using ( var client = new SmtpClient() )
         {
@@ -74,7 +74,7 @@ public class MailkitSender : ISender
 
             client.MessageSent += ( _, ea ) =>
             {
-                Console.WriteLine( ea.Response );
+                resp = ea.Response;
             };
 
             await client.ConnectAsync( _options.Host, _options.Port, _options.UseSsl );
@@ -82,10 +82,10 @@ public class MailkitSender : ISender
             if ( _options.Username != null )
                 await client.AuthenticateAsync( _options.Username, _options.Password );
 
-            resp = await client.SendAsync( m );
+            await client.SendAsync( m );
             await client.DisconnectAsync( true );
         }
 
-        Console.WriteLine( "{0}", resp );
+        return resp;
     }
 }
