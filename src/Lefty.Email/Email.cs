@@ -38,17 +38,20 @@ public class Email
     /// <summary>
     /// Plain text body.
     /// </summary>
+    [JsonIgnore( Condition = JsonIgnoreCondition.WhenWritingNull )]
     public string? TextBody { get; set; }
 
     /// <summary>
     /// HTML body.
     /// </summary>
+    [JsonIgnore( Condition = JsonIgnoreCondition.WhenWritingNull )]
     public string? HtmlBody { get; set; }
 
 
     /// <summary>
     /// List of attachments.
     /// </summary>
+    [JsonIgnore( Condition = JsonIgnoreCondition.WhenWritingNull )]
     public List<EmailAttachment>? Attachments { get; set; }
 }
 
