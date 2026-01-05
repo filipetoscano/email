@@ -75,6 +75,17 @@ It is also possible to pipe JSON to the command:
 ```
 
 
+Usage patterns
+--------------------------------------------------------------------------
+
+The tool supports all of the following usage patterns to construct the
+email message to send:
+
+* JSON (file, or piped in)
+* Environment variables, only if `--env` is provided)
+* CLI options
+
+
 Json format
 --------------------------------------------------------------------------
 
@@ -93,3 +104,43 @@ The format of the file is as follows:
 An Email can be expressed as follows:
 * `lskywalker19@tatooine.sw` - Just the e-email address
 * `Luke Skywalker <lskywalker19@tatooine.sw>` - With display name
+
+
+Environment variables
+--------------------------------------------------------------------------
+
+The following variables will be evaluated, but only if `--env` option
+is provided in the command line.
+
+| Env             | Type    | Description
+|-----------------|---------|---------------------------------------------
+| `EMAIL_FROM`    | Email   | Sender email address
+| `EMAIL_TO`      | Emails  | Semi colon seperated list of recipients
+| `EMAIL_SUBJECT` | String  | Subject
+| `EMAIL_HTML`    | File    | File name of HTML body
+| `EMAIL_TEXT`    | File    | File name of text body
+
+
+CLI options
+--------------------------------------------------------------------------
+
+```
+> dotnet lemail --help
+Email sender
+
+Usage: lemail [options] <InputFile>
+
+Arguments:
+  InputFile       Input JSON file
+
+Options:
+  --version       Show version information.
+  -f|--from       Sender email address
+  -t|--to         Recipient email address
+  -s|--subject    Subject
+  -h|--html-file  HTML file
+  -x|--text-file  Text file
+  -X|--text       Text content
+  -e|--env        Load sender/recipient from environment variables
+  -?|--help       Show help information
+```
