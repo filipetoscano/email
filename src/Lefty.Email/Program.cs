@@ -235,7 +235,7 @@ public class Program
         string cwd = Environment.CurrentDirectory;
         string? json = null;
 
-        if ( Console.IsInputRedirected == true )
+        if ( IsInputRedirected() == true )
         {
             json = await Console.In.ReadToEndAsync();
         }
@@ -437,5 +437,23 @@ public class Program
         AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: {output}" );
 
         return 0;
+    }
+
+
+    /// <summary />
+    private bool IsInputRedirected()
+    {
+        if ( Console.IsInputRedirected == false )
+            return false;
+
+        try
+        {
+            // Check if there's data available without blocking
+            return Console.In.Peek() != -1;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
