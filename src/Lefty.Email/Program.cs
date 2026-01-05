@@ -222,6 +222,10 @@ public class Program
 
 
     /// <summary />
+    [Option( "--stdin", CommandOptionType.SingleValue, Description = "Read JSON from stdin" )]
+    public bool FromStdin { get; set; }
+
+    /// <summary />
     [Option( "-e|--env", CommandOptionType.NoValue, Description = "Load sender/recipient from environment variables" )]
     public bool FromEnvironment { get; set; }
 
@@ -235,7 +239,7 @@ public class Program
         string cwd = Environment.CurrentDirectory;
         string? json = null;
 
-        if ( IsInputRedirected() == true )
+        if ( this.FromStdin == true )
         {
             json = await Console.In.ReadToEndAsync();
         }
@@ -437,23 +441,5 @@ public class Program
         AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: {output}" );
 
         return 0;
-    }
-
-
-    /// <summary />
-    private bool IsInputRedirected()
-    {
-        if ( Console.IsInputRedirected == false )
-            return false;
-
-        try
-        {
-            // Check if there's data available without blocking
-            return Console.In.Peek() != -1;
-        }
-        catch
-        {
-            return false;
-        }
     }
 }

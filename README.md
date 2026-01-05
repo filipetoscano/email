@@ -71,7 +71,7 @@ The tool accepts a single argument, which is the name of a Json file.
 It is also possible to pipe JSON to the command:
 
 ```bash
-> cat email.json | dotnet lemail
+> cat email.json | dotnet lemail --stdin
 ```
 
 
@@ -141,6 +141,7 @@ Options:
   -h|--html-file  HTML file
   -x|--text-file  Text file
   -X|--text       Text content
+  --stdin         Read JSON from stdin
   -e|--env        Load sender/recipient from environment variables
   -?|--help       Show help information
 ```
