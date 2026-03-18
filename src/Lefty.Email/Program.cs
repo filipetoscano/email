@@ -212,12 +212,12 @@ public class Program
     public string? HtmlFile { get; set; }
 
     /// <summary />
-    [Option( "-x|--text-file", CommandOptionType.SingleValue, Description = "Text file" )]
+    [Option( "-y|--text-file", CommandOptionType.SingleValue, Description = "Text file" )]
     [FileExists]
     public string? TextFile { get; set; }
 
     /// <summary />
-    [Option( "-X|--text", CommandOptionType.SingleValue, Description = "Text content" )]
+    [Option( "-x|--text", CommandOptionType.SingleValue, Description = "Text content" )]
     public string? Text { get; set; }
 
 
