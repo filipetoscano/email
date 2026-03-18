@@ -30,7 +30,7 @@ public class MailkitSender : ISender
         foreach ( var to in message.To! )
             m.To.Add( new MailboxAddress( to.DisplayName, to.Email ) );
 
-        m.Subject = message.Subject;
+        m.Subject = message.Subject ?? "";
 
 
         /*
