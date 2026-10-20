@@ -20,7 +20,7 @@
     <PackageDescription>.NET tool to send emails</PackageDescription>
     <PackageIconUrl>https://media.githubusercontent.com/media/filipetoscano/email/master/docs/img/icon.png</PackageIconUrl>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageTags>email;tool;resend</PackageTags>
+    <PackageTags>email;tool;smtp;resend;azure;acs</PackageTags>
 
     <!-- Debuging properties -->
     <IncludeSymbols>true</IncludeSymbols>

@@ -128,8 +128,12 @@ public class Program
             svc.Configure<AcsSenderOptions>( o =>
             {
                 // Auth
-                o.ConnectionString = Environment.GetEnvironmentVariable( "ACS_CONNECTIONSTRING" );
-                o.Endpoint = Environment.GetEnvironmentVariable( "ACS_ENDPOINT" );
+                // Empty values (such as unset CI secrets) are treated as not set
+                var cs = Environment.GetEnvironmentVariable( "ACS_CONNECTIONSTRING" );
+                o.ConnectionString = string.IsNullOrWhiteSpace( cs ) == true ? null : cs;
+
+                var endpoint = Environment.GetEnvironmentVariable( "ACS_ENDPOINT" );
+                o.Endpoint = string.IsNullOrWhiteSpace( endpoint ) == true ? null : endpoint;
             } );
             svc.AddTransient<ISender, AcsSender>();
         }
@@ -451,7 +455,17 @@ public class Program
         /*
          * 
          */
-        var output = await _sender.SendAsync( message );
+        string output;
+
+        try
+        {
+            output = await _sender.SendAsync( message );
+        }
+        catch ( SenderException ex )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.Message}" );
+            return 1;
+        }
 
         AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: {output}" );
 

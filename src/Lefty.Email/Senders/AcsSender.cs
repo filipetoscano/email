@@ -2,6 +2,7 @@
 using Azure.Communication.Email;
 using Azure.Identity;
 using Microsoft.Extensions.Options;
+using MimeKit;
 using AcsEmailAddress = Azure.Communication.Email.EmailAddress;
 using AcsEmailAttachment = Azure.Communication.Email.EmailAttachment;
 
@@ -45,9 +46,15 @@ public class AcsSender : ISender
         {
             foreach ( var ea in message.Attachments )
             {
+                // ACS only accepts an allow-list of content types, so infer
+                // from the file extension rather than using a generic type
+                var contentType = string.IsNullOrEmpty( ea.ContentType ) == false
+                    ? ea.ContentType
+                    : MimeTypes.GetMimeType( ea.Name! );
+
                 var att = new AcsEmailAttachment(
                     ea.Name!,
-                    ea.ContentType ?? "application/octet-stream",
+                    contentType,
                     BinaryData.FromBytes( ea.BinaryContent ?? [] ) );
 
                 att.ContentId = ea.ContentId;
@@ -67,7 +74,29 @@ public class AcsSender : ISender
         else
             client = new EmailClient( _options.ConnectionString );
 
-        var op = await client.SendAsync( WaitUntil.Completed, m );
+        EmailSendOperation op;
+
+        try
+        {
+            op = await client.SendAsync( WaitUntil.Completed, m );
+        }
+        catch ( AuthenticationFailedException ex )
+        {
+            throw new SenderException( $"unable to authenticate with Entra ID: {ex.Message}", ex );
+        }
+        catch ( RequestFailedException ex )
+        {
+            throw new SenderException( $"ACS request failed: {FirstLine( ex.Message )}", ex );
+        }
+        catch ( AggregateException ex )
+            when ( ex.InnerExceptions.All( x => x is RequestFailedException ) == true )
+        {
+            // Raised once the retry policy has been exhausted
+            throw new SenderException( $"ACS request failed: {FirstLine( ex.InnerExceptions[ ^1 ].Message )}", ex );
+        }
+
+        if ( op.Value.Status != EmailSendStatus.Succeeded )
+            throw new SenderException( $"ACS send operation {op.Id} ended with status {op.Value.Status}" );
 
         return $"{op.Id} {op.Value.Status}";
     }
@@ -81,4 +110,13 @@ public class AcsSender : ISender
 
         return list.Select( x => new AcsEmailAddress( x.Email, x.DisplayName ) ).ToList();
     }
-}
+
+
+    /// <summary />
+    private static string FirstLine( string value )
+    {
+        var ix = value.IndexOfAny( [ '\r', '\n' ] );
+
+        return ix < 0 ? value : value[ ..ix ];
+    }
+}
