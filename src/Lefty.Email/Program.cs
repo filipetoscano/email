@@ -129,6 +129,7 @@ public class Program
             {
                 // Auth
                 o.ConnectionString = Environment.GetEnvironmentVariable( "ACS_CONNECTIONSTRING" );
+                o.Endpoint = Environment.GetEnvironmentVariable( "ACS_ENDPOINT" );
             } );
             svc.AddTransient<ISender, AcsSender>();
         }

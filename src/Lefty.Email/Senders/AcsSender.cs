@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Azure.Communication.Email;
+using Azure.Identity;
 using Microsoft.Extensions.Options;
 using AcsEmailAddress = Azure.Communication.Email.EmailAddress;
 using AcsEmailAttachment = Azure.Communication.Email.EmailAttachment;
@@ -59,7 +60,12 @@ public class AcsSender : ISender
         /*
          * Send
          */
-        var client = new EmailClient( _options.ConnectionString );
+        EmailClient client;
+
+        if ( _options.Endpoint != null )
+            client = new EmailClient( new Uri( _options.Endpoint ), new DefaultAzureCredential() );
+        else
+            client = new EmailClient( _options.ConnectionString );
 
         var op = await client.SendAsync( WaitUntil.Completed, m );
 

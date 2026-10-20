@@ -56,11 +56,27 @@ When using `acs` sender (Azure Communication Services):
 
 | Env                    | M/O        | Default | Description
 |------------------------|------------|---------|---------------------------
-| `ACS_CONNECTIONSTRING` | Mandatory  | *none*  | Connection string, as obtained from Azure portal
+| `ACS_CONNECTIONSTRING` | Either     | *none*  | Connection string, as obtained from Azure portal
+| `ACS_ENDPOINT`         | Either     | *none*  | Endpoint URL, when authenticating with Entra ID
+
+Exactly one of `ACS_CONNECTIONSTRING` or `ACS_ENDPOINT` must be set.
 
 ```bash
 > set EMAIL_SENDER=acs
 > set ACS_CONNECTIONSTRING=endpoint=https://<resource>.communication.azure.com/;accesskey=<key>
+```
+
+When `ACS_ENDPOINT` is set, the tool authenticates using
+[`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential),
+which supports managed identity, workload identity, environment variables
+and developer credentials (such as `az login`). For a user-assigned managed
+identity, set `AZURE_CLIENT_ID` to the client id of the identity. The
+identity must be granted a role with permission to send email on the
+Communication Services resource.
+
+```bash
+> set EMAIL_SENDER=acs
+> set ACS_ENDPOINT=https://<resource>.communication.azure.com/
 ```
 
 Note that ACS ignores the display name of the sender: the sender address
