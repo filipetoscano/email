@@ -14,6 +14,11 @@ public enum Sender
     Resend,
 
     /// <summary>
+    /// Azure Communication Services API.
+    /// </summary>
+    Acs,
+
+    /// <summary>
     /// Null/always ok.
     /// </summary>
     Null,

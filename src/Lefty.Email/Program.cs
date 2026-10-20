@@ -119,6 +119,20 @@ public class Program
             svc.AddTransient<ISender, ResendSender>();
         }
 
+        // Azure Communication Services
+        if ( sender == Sender.Acs )
+        {
+            svc.AddOptions<AcsSenderOptions>().ValidateOnStart();
+            svc.AddTransient<IValidateOptions<AcsSenderOptions>, AcsSenderOptionsValidation>();
+
+            svc.Configure<AcsSenderOptions>( o =>
+            {
+                // Auth
+                o.ConnectionString = Environment.GetEnvironmentVariable( "ACS_CONNECTIONSTRING" );
+            } );
+            svc.AddTransient<ISender, AcsSender>();
+        }
+
         var sp = svc.BuildServiceProvider();
 
 

@@ -5,7 +5,7 @@
 [![NuGet](https://img.shields.io/nuget/vpre/lefty.email.svg?label=NuGet)](https://www.nuget.org/packages/Lefty.Email/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-.NET tool to send emails through SMTP, or Resend.
+.NET tool to send emails through SMTP, Resend, or Azure Communication Services.
 
 
 Installing
@@ -50,6 +50,22 @@ When using `resend` sender:
 > set EMAIL_SENDER=resend
 > set RESEND_APITOKEN=<api>
 ```
+
+
+When using `acs` sender (Azure Communication Services):
+
+| Env                    | M/O        | Default | Description
+|------------------------|------------|---------|---------------------------
+| `ACS_CONNECTIONSTRING` | Mandatory  | *none*  | Connection string, as obtained from Azure portal
+
+```bash
+> set EMAIL_SENDER=acs
+> set ACS_CONNECTIONSTRING=endpoint=https://<resource>.communication.azure.com/;accesskey=<key>
+```
+
+Note that ACS ignores the display name of the sender: the sender address
+must be a MailFrom address of a domain linked to the resource, and the
+display name is configured there.
 
 
 Example
