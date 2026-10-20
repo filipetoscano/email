@@ -6,11 +6,16 @@
     <File Path="cicd/release.sh" />
   </Folder>
   <Folder Name="/sln/">
+    <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Lefty.Email/Lefty.Email.csproj" Id="bf232c1e-d4be-47c8-afa5-38802680e2a7" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lefty.Email.Tests/Lefty.Email.Tests.csproj" Id="deec628e-02f4-4948-aac7-7088981b972e" />
   </Folder>
 </Solution>
